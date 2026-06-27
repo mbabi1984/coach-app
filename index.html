@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<title>تطبيق التدريب</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#14161B">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Oswald:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#14161B;--ink-2:#1C1F26;--ink-3:#262A33;--ink-4:#2F343E;--text:#E9E7E2;--muted:#888E9B;
+    --line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.14);--ember:#FF5A36;--mint:#34D8A6;--blue:#7C9CFF;--warn:#F2B33D}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{background:radial-gradient(1000px 500px at 80% -10%,rgba(255,90,54,.10),transparent 60%),var(--ink);
+    color:var(--text);font-family:'Cairo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100%}
+  .mono{font-family:'Space Mono',monospace}.dsp{font-family:'Oswald','Cairo',sans-serif}
+  input,select,button,textarea{font-family:inherit;color:inherit}
+  button{cursor:pointer}
+  .wrap{max-width:760px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+  .icn{width:1em;height:1em;display:inline-block;vertical-align:-.12em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  /* top bar */
+  .top{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(20,22,27,.92);backdrop-filter:blur(8px);z-index:20}
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--ember),#ff8c4b);display:grid;place-items:center;color:#1b0d07;flex:none}
+  .logo .icn{width:20px;height:20px}
+  .top .nm{font-weight:900;font-size:15px;line-height:1}.top .rl{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .top .sp{margin-inline-start:auto}
+  .lang{display:inline-flex;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+  .lang button{font-weight:700;font-size:12px;color:var(--muted);background:transparent;border:0;border-radius:7px;padding:6px 11px}
+  .lang button.on{background:var(--ember);color:#1b0d07}
+  .ghost{background:var(--ink-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 11px;font-size:12px;font-weight:700;color:var(--muted)}
+  .ghost:hover{color:var(--text)}
+  .body{flex:1;padding:16px;overflow-y:auto}
+  /* entry */
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;gap:16px}
+  .center .big{width:74px;height:74px;border-radius:20px;background:linear-gradient(150deg,var(--ember),#ff8c4b);display:grid;place-items:center;color:#1b0d07}
+  .center .big .icn{width:42px;height:42px}
+  .center h1{font-size:26px;font-weight:900}.center p{color:var(--muted);font-size:14px;max-width:340px;line-height:1.6}
+  .choices{display:flex;flex-direction:column;gap:11px;width:100%;max-width:320px;margin-top:8px}
+  .btn{font-weight:700;font-size:15px;border-radius:13px;padding:14px;border:1px solid var(--line-2);background:var(--ink-3);color:var(--text);transition:.15s;width:100%}
+  .btn:hover{border-color:var(--ember)}
+  .btn.pri{background:var(--ember);color:#1b0d07;border-color:transparent}
+  .btn.sm{font-size:13px;padding:9px 13px;width:auto}
+  .field{width:100%;max-width:320px;text-align:right}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .inp{width:100%;background:var(--ink-2);border:1px solid var(--line-2);border-radius:12px;padding:13px 14px;font-size:15px}
+  .inp.mono{font-family:'Space Mono',monospace;text-align:center;letter-spacing:.1em}
+  .err{color:var(--ember);font-size:13px;min-height:18px}
+  .muted{color:var(--muted);font-size:12.5px}
+  /* cards & lists */
+  .card{background:var(--ink-2);border:1px solid var(--line);border-radius:15px;padding:14px;margin-bottom:12px}
+  .row{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--ink-2);margin-bottom:10px}
+  .row:active{background:var(--ink-3)}
+  .av{width:42px;height:42px;border-radius:12px;flex:none;display:grid;place-items:center;font-weight:700;color:#10131a;background:var(--ember)}
+  .row .nm{font-weight:700;font-size:15px}.row .sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .row .chev{margin-inline-start:auto;color:var(--muted)}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .head h2{font-size:20px;font-weight:900;font-family:'Oswald','Cairo',sans-serif}
+  .head .sp{margin-inline-start:auto}
+  .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;background:none;border:0;margin-bottom:6px}
+  .tabs{display:flex;gap:7px;margin-bottom:14px}
+  .tabs button{flex:1;font-weight:700;font-size:13px;color:var(--muted);background:var(--ink-2);border:1px solid var(--line);border-radius:11px;padding:10px}
+  .tabs button.on{background:var(--ember);color:#1b0d07;border-color:transparent}
+  .daysel{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
+  .dbtn{flex:none;min-width:58px;text-align:center;padding:9px 6px;border-radius:11px;border:1px solid var(--line);background:var(--ink-2)}
+  .dbtn.on{background:var(--ink-4);border-color:var(--ember)}
+  .dbtn .d{font-size:12.5px;font-weight:700}.dbtn .dot{width:6px;height:6px;border-radius:50%;margin:5px auto 0}
+  .exr{background:var(--ink-2);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:11px}
+  .exr-h{display:flex;align-items:center;gap:10px}
+  .vt{width:46px;height:34px;border-radius:8px;flex:none;background:linear-gradient(135deg,var(--ink-4),var(--ink-3));position:relative;overflow:hidden;display:grid;place-items:center;color:var(--ember)}
+  .vt img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+  .vt .icn{width:18px;height:18px;z-index:1}
+  .exr-h .nm{flex:1}.exr-h .nm .a{font-weight:700;font-size:14px}.exr-h .nm .b{font-size:11px;color:var(--muted);margin-top:2px}
+  .x{background:none;border:1px solid var(--line-2);border-radius:7px;width:28px;height:26px;color:var(--muted);font-size:13px}
+  .libnote{font-size:11.5px;color:var(--blue);margin:8px 0 0;background:rgba(124,156,255,.07);border:1px solid rgba(124,156,255,.18);border-radius:9px;padding:7px 10px;line-height:1.5}
+  .ff-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .ff label{display:block;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-family:'Space Mono',monospace}
+  .ff input{width:100%;background:var(--ink);border:1px solid var(--line-2);border-radius:9px;padding:8px 6px;font-family:'Space Mono',monospace;font-size:13px;text-align:center}
+  .exr-note input{width:100%;margin-top:9px;background:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:12.5px}
+  .pick{display:flex;align-items:center;gap:10px;padding:10px;border-radius:11px;border:1px solid var(--line);margin-bottom:8px;background:var(--ink-2)}
+  .pick:active{background:var(--ink-3)}
+  /* set logging */
+  .setlog{display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
+  .setlog .sn{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);width:46px;flex:none}
+  .setlog input{flex:1;width:100%;background:var(--ink);border:1px solid var(--line-2);border-radius:8px;padding:8px;font-family:'Space Mono',monospace;font-size:14px;text-align:center}
+  .setlog .lg{flex:none;width:40px;height:36px;border-radius:8px;border:1px solid var(--line-2);background:var(--ink-3);color:var(--muted);font-size:15px}
+  .setlog.done input{opacity:.5}.setlog.done .lg{background:var(--mint);color:#08251c;border-color:transparent}
+  .vplayer{margin-top:11px;border-radius:12px;overflow:hidden;border:1px solid var(--line-2);background:#000}
+  .vp-stage{aspect-ratio:16/9;position:relative;display:grid;place-items:center;background:linear-gradient(135deg,#15171d,#23262f)}
+  .vp-stage img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:.55}
+  .vp-play{width:50px;height:50px;border-radius:50%;background:var(--ember);display:grid;place-items:center;color:#1b0d07;z-index:1}
+  .vp-foot{display:flex;justify-content:space-between;padding:9px 12px;background:var(--ink-2);font-size:11.5px}
+  .vp-foot a{color:var(--ember);text-decoration:none;font-weight:700}
+  .watch{font-size:12px;color:var(--ember);margin-top:9px;display:inline-flex;gap:6px;font-weight:700;border:1px solid var(--line-2);border-radius:9px;padding:7px 11px;background:none}
+  /* chat */
+  .chat{display:flex;flex-direction:column;gap:9px;padding-bottom:10px}
+  .msg{max-width:82%;padding:10px 13px;border-radius:15px;font-size:14px;line-height:1.5}
+  .msg.them{background:var(--ink-3);border:1px solid var(--line);align-self:flex-start;border-start-start-radius:5px}
+  .msg.me{background:var(--ember);color:#1b0d07;align-self:flex-end;border-end-end-radius:5px}
+  .msg .t{font-family:'Space Mono',monospace;font-size:9px;opacity:.6;margin-top:4px}
+  .composer{display:flex;gap:9px;align-items:center;padding:11px 14px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--ink)}
+  .composer .inp{flex:1;border-radius:999px;padding:11px 15px}
+  .composer .send{width:42px;height:42px;border-radius:50%;background:var(--ember);border:0;color:#1b0d07;flex:none;display:grid;place-items:center}
+  /* onboarding */
+  .ob label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}
+  .ob .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opts{display:flex;gap:8px;flex-wrap:wrap}
+  .opt{padding:10px 14px;border:1px solid var(--line-2);border-radius:11px;font-size:13.5px;background:var(--ink-2)}
+  .opt.on{border-color:var(--ember);background:rgba(255,90,54,.1);color:var(--ember)}
+  .invite-box{display:flex;gap:8px;align-items:center;background:var(--ink);border:1px dashed var(--ember);border-radius:11px;padding:11px 13px;margin-top:10px}
+  .invite-box .c{flex:1;font-family:'Space Mono';color:var(--ember);font-size:15px;letter-spacing:.08em}
+  .empty{text-align:center;color:var(--muted);padding:34px 16px;font-size:13.5px;line-height:1.7}
+  #toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--mint);color:#08251c;font-weight:700;font-size:13px;padding:11px 18px;border-radius:12px;z-index:90;opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center}
+  #toast.show{opacity:1;transform:translate(-50%,4px)}
+  #toast.bad{background:var(--ember);color:#1b0d07}
+  .add-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
+  .save-bar{position:sticky;bottom:0;padding:12px 0;background:linear-gradient(transparent,var(--ink) 40%)}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="center"><div class="muted">جارٍ التحميل…</div></div>
+</div>
+<div id="toast"></div>
+
+<!-- Supabase JS v2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+/* ============ setup ============ */
+const ICN={barbell:'<svg class="icn" viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>',
+ play:'<svg class="icn" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M7 5l12 7-12 7z"/></svg>',
+ send:'<svg class="icn" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ chev:'<svg class="icn" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>'};
+const C = window.APP_CONFIG||{};
+const days=[['sun','الأحد','Sun'],['mon','الإثنين','Mon'],['tue','الثلاثاء','Tue'],['wed','الأربعاء','Wed'],['thu','الخميس','Thu'],['fri','الجمعة','Fri'],['sat','السبت','Sat']];
+const muscles={chest:['صدر','Chest'],back:['ظهر','Back'],legs:['أرجل','Legs'],shoulders:['أكتاف','Shoulders'],arms:['أذرع','Arms'],core:['بطن','Core'],cardio:['كارديو','Cardio'],mobility:['إطالة','Mobility']};
+const LV={beg:['مبتدئ','Beginner'],int:['متوسط','Intermediate'],adv:['متقدّم','Advanced']};
+const GOAL={strength:['بناء قوة','Strength'],cut:['تنشيف','Cutting'],recomp:['إعادة تكوين','Recomp'],endurance:['لياقة','Endurance']};
+
+let sb=null, configOK=false;
+try{
+  if(C.SUPABASE_URL && C.SUPABASE_URL.startsWith('http') && C.SUPABASE_ANON_KEY && C.SUPABASE_ANON_KEY.length>20){
+    sb = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+    configOK=true;
+  }
+}catch(e){ console.error(e); }
+
+let st={ lang:localStorage.getItem('lang')||'ar', role:null, view:'entry',
+  exercises:[], clients:[], client:null, sel:null, day:'tue', tab:'program',
+  showPick:false, showAddEx:false, play:null, msgs:[], chan:null, ob:{level:'int',goal:'strength',inj:[]} };
+
+const $=document.getElementById.bind(document);
+const T=(ar,en)=>st.lang==='ar'?ar:en;
+function toast(m,bad){const t=$('toast');t.textContent=m;t.className='show'+(bad?' bad':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',2200);}
+function ytThumb(yt){return yt?`<img src="https://img.youtube.com/vi/${yt}/hqdefault.jpg" onerror="this.style.display='none'">`:'';}
+function ytId(u){if(!u)return '';const m=u.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{6,})/);return m?m[1]:(/^[\w-]{6,}$/.test(u)?u:'');}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function initials(n){return (n||'؟').trim().charAt(0);}
+function code(){return 'CM-'+Math.random().toString(36).slice(2,6).toUpperCase();}
+
+/* ============ data ============ */
+async function loadExercises(){const {data,error}=await sb.from('exercises').select('*').order('id');if(error)throw error;st.exercises=data||[];}
+async function loadClients(){const {data,error}=await sb.from('clients').select('*').order('created_at');if(error)throw error;st.clients=data||[];}
+async function loadClientByCode(c){const {data,error}=await sb.from('clients').select('*').eq('invite_code',c.trim().toUpperCase()).maybeSingle();if(error)throw error;return data;}
+async function loadClientById(id){const {data,error}=await sb.from('clients').select('*').eq('id',id).maybeSingle();if(error)throw error;return data;}
+async function saveClient(patch){const {data,error}=await sb.from('clients').update(patch).eq('id',st.client.id).select().maybeSingle();if(error)throw error;st.client=data;return data;}
+async function saveSelProgram(){const {error}=await sb.from('clients').update({program:st.sel.program}).eq('id',st.sel.id);if(error)throw error;}
+async function loadMsgs(cid){const {data,error}=await sb.from('messages').select('*').eq('client_id',cid).order('created_at');if(error)throw error;st.msgs=data||[];}
+async function sendMsg(cid,sender,bodyTxt){const {error}=await sb.from('messages').insert({client_id:cid,sender,body:bodyTxt});if(error)throw error;}
+function subscribeMsgs(cid){
+  if(st.chan){sb.removeChannel(st.chan);st.chan=null;}
+  st.chan=sb.channel('msgs-'+cid)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'client_id=eq.'+cid},(p)=>{
+      st.msgs.push(p.new); if(st.view==='chat'||st.tab==='chat'){renderChatList();}
+    }).subscribe();
+}
+
+/* ============ render root ============ */
+function render(){
+  document.documentElement.lang=st.lang;document.documentElement.dir=st.lang==='ar'?'rtl':'ltr';
+  const w=$('wrap');
+  if(!configOK){w.innerHTML=configError();return;}
+  if(st.view==='entry')w.innerHTML=topBar()+entry();
+  else if(st.view==='coach-pass')w.innerHTML=topBar()+coachPass();
+  else if(st.view==='coach')w.innerHTML=topBar(true)+`<div class="body">${st.sel?coachDetail():coachRoster()}</div>`;
+  else if(st.view==='join')w.innerHTML=topBar()+clientJoin();
+  else if(st.view==='onboard')w.innerHTML=topBar()+onboarding();
+  else if(st.view==='client')w.innerHTML=topBar(true)+clientApp();
+  bind();
+}
+function topBar(withSwitch){const nm=st.lang==='ar'?(C.BRAND_NAME_AR||'تطبيق التدريب'):(C.BRAND_NAME_EN||'Training App');
+ return `<div class="top"><div class="logo">${ICN.barbell}</div>
+  <div><div class="nm dsp">${esc(nm)}</div><div class="rl">${st.role==='coach'?T('لوحة المدرب','Coach'):st.role==='client'?T('تطبيق المتدرب','Athlete'):''}</div></div>
+  <div class="sp"></div>
+  ${withSwitch?`<button class="ghost" data-act="logout">${T('خروج','Exit')}</button>`:''}
+  <div class="lang"><button data-lang="ar" class="${st.lang==='ar'?'on':''}">ع</button><button data-lang="en" class="${st.lang==='en'?'on':''}">EN</button></div>
+ </div>`;
+}
+function configError(){return `<div class="center"><div class="big">${ICN.barbell}</div><h1>${T('إعداد مطلوب','Setup needed')}</h1>
+  <p>${T('افتح ملف config.js وحط رابط مشروع Supabase ومفتاح anon، بعدها حدّث الصفحة.','Open config.js, add your Supabase URL and anon key, then reload.')}</p></div>`;}
+
+/* ============ entry ============ */
+function entry(){return `<div class="center"><div class="big">${ICN.barbell}</div>
+  <h1>${T('أهلاً فيك','Welcome')}</h1>
+  <p>${T('اختر كيف بتدخل','Choose how you sign in')}</p>
+  <div class="choices">
+   <button class="btn pri" data-act="go-coach">${T('أنا المدرب','I am the coach')}</button>
+   <button class="btn" data-act="go-client">${T('أنا متدرب — معي رمز دعوة','I am an athlete — I have a code')}</button>
+  </div></div>`;}
+function coachPass(){return `<div class="center"><div class="big">${ICN.barbell}</div>
+  <h1>${T('دخول المدرب','Coach sign-in')}</h1>
+  <div class="field"><label>${T('رمز المدرب','Coach passcode')}</label><input class="inp" id="pass" type="password" autocomplete="off"></div>
+  <div class="err" id="passErr"></div>
+  <div class="choices"><button class="btn pri" data-act="coach-ok">${T('دخول','Enter')}</button>
+  <button class="btn" data-act="entry">${T('رجوع','Back')}</button></div></div>`;}
+function clientJoin(){return `<div class="center"><div class="big">${ICN.barbell}</div>
+  <h1>${T('رمز الدعوة','Invite code')}</h1>
+  <p>${T('اكتب الرمز اللي وصلك من مدربك','Enter the code your coach sent you')}</p>
+  <div class="field"><input class="inp mono" id="code" placeholder="CM-XXXX" autocapitalize="characters"></div>
+  <div class="err" id="joinErr"></div>
+  <div class="choices"><button class="btn pri" data-act="join">${T('دخول','Join')}</button>
+  <button class="btn" data-act="entry">${T('رجوع','Back')}</button></div></div>`;}
+
+/* ============ coach ============ */
+function coachRoster(){
+ return `<div class="head"><h2>${T('المشتركين','Athletes')}</h2><div class="sp"></div>
+   <button class="btn pri sm" data-act="add-client">${T('+ إضافة','+ Add')}</button></div>
+  ${st.clients.length? st.clients.map(c=>`<div class="row" data-open="${c.id}">
+    <div class="av">${esc(initials(c.name))}</div>
+    <div><div class="nm">${esc(c.name)}</div><div class="sub mono">${esc(c.invite_code)} · ${c.onboarded?T('مكتمل','active'):T('بانتظار التسجيل','pending')}</div></div>
+    <div class="chev">${ICN.chev}</div></div>`).join('')
+  : `<div class="empty">${T('ما في مشتركين بعد. اضغط \\"إضافة\\" وأنشئ أول مشترك ورمز دعوته.','No athletes yet. Tap Add to create your first one and share the invite code.')}</div>`}`;
+}
+function coachDetail(){const c=st.sel;
+ const tabs=[['program',T('البرنامج','Program')],['library',T('المكتبة','Library')],['chat',T('المحادثة','Chat')]];
+ let inner = st.tab==='program'?builder(): st.tab==='library'?library(true): chatView('coach');
+ return `<button class="back" data-act="roster">${ICN.chev} ${T('رجوع','Back')}</button>
+  <div class="head"><div class="av">${esc(initials(c.name))}</div><div><div class="nm" style="font-size:18px;font-weight:900">${esc(c.name)}</div>
+   <div class="sub mono">${esc(c.invite_code)}</div></div></div>
+  <div class="tabs">${tabs.map(([k,l])=>`<button class="${st.tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</div>
+  ${inner}`;
+}
+function builder(){const c=st.sel; const prog=c.program||{}; const dd=prog[st.day];
+ const dayBtns=days.map(([k,a,e])=>{const has=prog[k]&&prog[k].items&&prog[k].items.length;return `<div class="dbtn ${st.day===k?'on':''}" data-day="${k}"><div class="d">${T(a,e)}</div><div class="dot" style="background:${has?'var(--mint)':'var(--ink-4)'}"></div></div>`}).join('');
+ let dayBody;
+ if(!dd){dayBody=`<div class="empty">${T('يوم راحة','Rest day')} · <button class="btn pri sm" data-act="add-day">${T('أضف تمرين','Add exercise')}</button></div>`;}
+ else{
+  dayBody=`<div class="card"><label class="muted" style="font-size:11px">${T('اسم اليوم','Day name')}</label>
+    <input class="inp" id="dayTitle" value="${esc(T(dd.title_ar,dd.title_en||dd.title_ar))}" style="margin-top:6px"></div>
+   ${dd.items.map((it,ix)=>{const ex=st.exercises.find(e=>e.id===it.exId);const note=ex?T(ex.note_ar,ex.note_en):'';return `<div class="exr">
+    <div class="exr-h"><div class="vt">${ex&&ex.yt?ytThumb(ex.yt):ICN.barbell}</div>
+     <div class="nm"><div class="a">${ex?esc(T(ex.name_ar,ex.name_en)):'—'}</div><div class="b">${ex?T(muscles[ex.muscle][0],muscles[ex.muscle][1]):''}</div></div>
+     <button class="x" data-rm="${ix}">✕</button></div>
+    ${note?`<div class="libnote">🎬 ${esc(note)}</div>`:''}
+    <div class="ff-grid">
+      <div class="ff"><label>${T('مجموعات','Sets')}</label><input data-f="sets" data-ix="${ix}" value="${esc(it.sets)}"></div>
+      <div class="ff"><label>${T('تكرار','Reps')}</label><input data-f="reps" data-ix="${ix}" value="${esc(it.reps)}"></div>
+      <div class="ff"><label>${T('وزن','Kg')}</label><input data-f="weight" data-ix="${ix}" value="${esc(it.weight)}"></div>
+      <div class="ff"><label>${T('راحة ث','Rest')}</label><input data-f="rest" data-ix="${ix}" value="${esc(it.rest)}"></div>
+    </div>
+    <div class="exr-note"><input data-note="${ix}" placeholder="${T('ملاحظة للمشترك…','Note for athlete…')}" value="${esc(T(it.note_ar,it.note_en))}"></div>
+   </div>`}).join('')}
+   <div class="add-row"><button class="btn pri sm" data-act="pick">${T('+ أضف تمرين','+ Add exercise')}</button></div>`;
+ }
+ const picker = st.showPick?`<div class="card"><div class="muted" style="margin-bottom:10px">${T('اختر من المكتبة','Pick from library')}</div>
+   ${st.exercises.map(e=>`<div class="pick" data-pick="${e.id}"><div class="vt" style="width:40px;height:30px">${e.yt?ytThumb(e.yt):ICN.barbell}</div>
+     <div><div style="font-weight:700;font-size:13px">${esc(T(e.name_ar,e.name_en))}</div><div class="muted" style="font-size:11px">${T(muscles[e.muscle][0],muscles[e.muscle][1])}</div></div></div>`).join('')}
+   <button class="btn sm" data-act="pick-cancel" style="margin-top:6px">${T('إلغاء','Cancel')}</button></div>`:'';
+ return `<div class="daysel">${dayBtns}</div>${picker}${dayBody}
+   <div class="save-bar"><button class="btn pri" data-act="save-prog">${T('💾 حفظ البرنامج','💾 Save program')}</button></div>`;
+}
+function library(inCoach){
+ const form=st.showAddEx?`<div class="card">
+   <div class="muted" style="margin-bottom:8px">${T('إضافة تمرين للمكتبة','Add exercise')}</div>
+   <input class="inp" id="ex_ar" placeholder="${T('الاسم بالعربي','Name (Arabic)')}" style="margin-bottom:8px">
+   <input class="inp" id="ex_en" placeholder="${T('الاسم بالإنجليزي','Name (English)')}" style="margin-bottom:8px">
+   <select class="inp" id="ex_m" style="margin-bottom:8px">${Object.keys(muscles).map(m=>`<option value="${m}">${T(muscles[m][0],muscles[m][1])}</option>`).join('')}</select>
+   <input class="inp" id="ex_yt" placeholder="${T('رابط فيديو يوتيوب','YouTube link')}" style="margin-bottom:8px">
+   <textarea class="inp" id="ex_note" placeholder="${T('ملاحظة المدرب على التمرين','Coach note')}" style="min-height:60px;margin-bottom:10px"></textarea>
+   <div class="add-row"><button class="btn pri sm" data-act="save-ex">${T('حفظ','Save')}</button><button class="btn sm" data-act="ex-cancel">${T('إلغاء','Cancel')}</button></div>
+ </div>`:'';
+ return `<div class="head" style="margin-bottom:10px"><div class="muted">${T('التمارين تظهر للمشترك مع الفيديو والملاحظة','Shows to athletes with video & note')}</div><div class="sp"></div>
+   <button class="btn pri sm" data-act="add-ex">${T('+ تمرين','+ Exercise')}</button></div>
+  ${form}
+  ${st.exercises.map(e=>{const note=T(e.note_ar,e.note_en);return `<div class="exr"><div class="exr-h"><div class="vt">${e.yt?ytThumb(e.yt):ICN.barbell}</div>
+    <div class="nm"><div class="a">${esc(T(e.name_ar,e.name_en))}</div><div class="b">${T(muscles[e.muscle][0],muscles[e.muscle][1])}</div></div></div>
+    ${note?`<div class="libnote">📝 ${esc(note)}</div>`:''}</div>`;}).join('')}`;
+}
+
+/* ============ chat (shared) ============ */
+function chatView(who){
+ return `<div class="chat" id="chatList">${chatHtml(who)}</div>
+   <div class="composer"><input class="inp" id="msgInp" placeholder="${T('اكتب رسالة…','Type a message…')}">
+   <button class="send" data-act="send" data-who="${who}">${ICN.send}</button></div>`;
+}
+function chatHtml(who){ // who = current sender perspective
+ if(!st.msgs.length)return `<div class="empty">${T('ابدأ المحادثة','Start the conversation')}</div>`;
+ return st.msgs.map(m=>{const mine=m.sender===who;const tm=new Date(m.created_at).toLocaleTimeString(st.lang==='ar'?'ar':'en',{hour:'2-digit',minute:'2-digit'});
+   return `<div class="msg ${mine?'me':'them'}">${esc(m.body)}<div class="t">${tm}</div></div>`;}).join('');
+}
+function renderChatList(){const el=$('chatList');if(el){const who=st.role==='coach'?'coach':'client';el.innerHTML=chatHtml(who);el.scrollTop=el.scrollHeight;}}
+
+/* ============ client ============ */
+function onboarding(){const d=st.ob;
+ return `<div class="body"><div class="head"><h2>${T('سجّل بياناتك','Your details')}</h2></div>
+  <div class="card">
+   <div class="grid2"><div><label class="muted">${T('العمر','Age')}</label><input class="inp" id="o_age" inputmode="numeric"></div>
+     <div><label class="muted">${T('الوزن (كجم)','Weight (kg)')}</label><input class="inp" id="o_weight" inputmode="numeric"></div></div>
+   <div class="grid2" style="margin-top:10px"><div><label class="muted">${T('الطول (سم)','Height (cm)')}</label><input class="inp" id="o_height" inputmode="numeric"></div>
+     <div><label class="muted">${T('الخصر (سم)','Waist (cm)')}</label><input class="inp" id="o_waist" inputmode="numeric"></div></div>
+   <label class="muted" style="display:block;margin-top:12px">${T('مستواك','Level')}</label>
+   <div class="opts">${Object.keys(LV).map(k=>`<div class="opt ${d.level===k?'on':''}" data-lv="${k}">${T(LV[k][0],LV[k][1])}</div>`).join('')}</div>
+   <label class="muted" style="display:block;margin-top:12px">${T('هدفك','Goal')}</label>
+   <div class="opts">${Object.keys(GOAL).map(k=>`<div class="opt ${d.goal===k?'on':''}" data-gl="${k}">${T(GOAL[k][0],GOAL[k][1])}</div>`).join('')}</div>
+   <label class="muted" style="display:block;margin-top:12px">${T('إصابات؟','Injuries?')}</label>
+   <div class="opts">${[['shoulder','كتف','Shoulder'],['back','أسفل الظهر','Lower back'],['knee','ركبة','Knee'],['none','ما في','None']].map(([k,a,e])=>`<div class="opt ${d.inj.includes(k)?'on':''}" data-inj="${k}">${T(a,e)}</div>`).join('')}</div>
+  </div>
+  <button class="btn pri" data-act="finish-ob">${T('يلا نبدأ 💪','Start 💪')}</button></div>`;
+}
+function clientApp(){
+ const c=st.client; const prog=c.program||{};
+ const filledDays=days.filter(([k])=>prog[k]&&prog[k].items&&prog[k].items.length);
+ if(st.tab!=='chat' && !filledDays.find(([k])=>k===st.day)) st.day = filledDays.length?filledDays[0][0]:st.day;
+ const tabs=[['program',T('تماريني','My workout')],['chat',T('المحادثة','Chat')]];
+ let inner;
+ if(st.tab==='chat'){inner=chatView('client');}
+ else{
+   if(!filledDays.length){inner=`<div class="empty">${T('مدربك لسا ما جهّز برنامجك. تواصل معه من المحادثة.','Your coach has not set your program yet. Message them in Chat.')}</div>`;}
+   else{
+     const dsel=`<div class="daysel">${filledDays.map(([k,a,e])=>`<div class="dbtn ${st.day===k?'on':''}" data-day="${k}"><div class="d">${T(a,e)}</div></div>`).join('')}</div>`;
+     const dd=prog[st.day]; const logs=c.logs||{};
+     const exHtml=dd.items.map((it,ix)=>{const ex=st.exercises.find(e=>e.id===it.exId);const n=parseInt(it.sets)||0;const playing=st.play===ix;
+       const cn=ex?T(ex.note_ar,ex.note_en):''; const inote=T(it.note_ar,it.note_en);
+       return `<div class="exr"><div class="exr-h"><div class="vt" data-play="${ix}">${ex&&ex.yt?ytThumb(ex.yt):''}<span class="vp-mini">${ICN.play}</span></div>
+         <div class="nm"><div class="a">${ex?esc(T(ex.name_ar,ex.name_en)):'—'}</div><div class="b mono">${esc(it.sets)} × ${esc(it.reps)}${it.weight?' · '+esc(it.weight)+'kg':''}${it.rest?' · '+esc(it.rest)+'s':''}</div></div></div>
+         ${cn?`<div class="libnote">🎬 ${esc(cn)}</div>`:''}${inote?`<div class="libnote" style="color:var(--text)">📝 ${esc(inote)}</div>`:''}
+         ${playing&&ex&&ex.yt?`<div class="vplayer"><div class="vp-stage">${ytThumb(ex.yt)}<div class="vp-play">${ICN.play}</div></div>
+            <div class="vp-foot"><span class="muted">${esc(T(ex.name_ar,ex.name_en))}</span><a href="https://www.youtube.com/watch?v=${ex.yt}" target="_blank" rel="noopener">${T('يوتيوب ↗','YouTube ↗')}</a></div></div>`
+           :`<button class="watch" data-play="${ix}">${ICN.play} ${T('شاهد الأداء','Watch')}</button>`}
+         ${Array.from({length:n}).map((_,s)=>{const key=`${st.day}-${ix}-${s}`;const lg=logs[key];return `<div class="setlog ${lg&&lg.done?'done':''}">
+            <span class="sn">${T('مجموعة','Set')} ${s+1}</span>
+            <input data-log="${key}" data-fld="reps" placeholder="${esc(it.reps)}" value="${lg?esc(lg.reps):''}" inputmode="numeric">
+            <input data-log="${key}" data-fld="weight" placeholder="${esc(it.weight)||'kg'}" value="${lg?esc(lg.weight):''}" inputmode="numeric">
+            <button class="lg" data-logbtn="${key}">${lg&&lg.done?'✓':'+'}</button></div>`}).join('')}
+       </div>`;}).join('');
+     inner=`${dsel}<div class="card" style="background:linear-gradient(150deg,var(--ink-3),var(--ink-2))">
+        <div style="font-weight:900;font-size:17px">${esc(T(dd.title_ar,dd.title_en||dd.title_ar))}</div>
+        <div class="muted" style="font-size:12px;margin-top:3px">${dd.items.length} ${T('تمارين','exercises')}</div></div>${exHtml}`;
+   }
+ }
+ return `<div class="tabs" style="margin:14px 16px 0">${tabs.map(([k,l])=>`<button class="${st.tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</div>
+   <div class="body" style="padding-top:12px">${inner}</div>`;
+}
+
+/* ============ events ============ */
+function bind(){
+ document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{st.lang=b.dataset.lang;localStorage.setItem('lang',st.lang);render();});
+ const act=a=>document.querySelectorAll(`[data-act="${a}"]`);
+ document.querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>handle(el.dataset.act, el));
+ document.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>openClient(el.dataset.open));
+ document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{st.tab=el.dataset.tab;st.play=null;render();if(st.tab==='chat')afterChat();});
+ document.querySelectorAll('[data-day]').forEach(el=>el.onclick=()=>{st.day=el.dataset.day;st.showPick=false;st.play=null;render();});
+ document.querySelectorAll('[data-play]').forEach(el=>el.onclick=()=>{const ix=+el.dataset.play;st.play=st.play===ix?null:ix;render();});
+ document.querySelectorAll('[data-pick]').forEach(el=>el.onclick=()=>pickExercise(+el.dataset.pick));
+ document.querySelectorAll('[data-rm]').forEach(el=>el.onclick=()=>{st.sel.program[st.day].items.splice(+el.dataset.rm,1);render();});
+ document.querySelectorAll('[data-f]').forEach(el=>el.onchange=()=>{st.sel.program[st.day].items[+el.dataset.ix][el.dataset.f]=el.value;});
+ document.querySelectorAll('[data-note]').forEach(el=>el.onchange=()=>{const it=st.sel.program[st.day].items[+el.dataset.note];if(st.lang==='ar')it.note_ar=el.value;else it.note_en=el.value;});
+ const dt=$('dayTitle');if(dt)dt.onchange=()=>{const d=st.sel.program[st.day];if(st.lang==='ar')d.title_ar=dt.value;else d.title_en=dt.value;};
+ document.querySelectorAll('[data-lv]').forEach(el=>el.onclick=()=>{st.ob.level=el.dataset.lv;render();});
+ document.querySelectorAll('[data-gl]').forEach(el=>el.onclick=()=>{st.ob.goal=el.dataset.gl;render();});
+ document.querySelectorAll('[data-inj]').forEach(el=>el.onclick=()=>{const k=el.dataset.inj,a=st.ob.inj;if(k==='none')st.ob.inj=['none'];else{const i=a.indexOf(k);if(i>=0)a.splice(i,1);else{a.push(k);const ni=a.indexOf('none');if(ni>=0)a.splice(ni,1);}}render();});
+ // client set logging
+ document.querySelectorAll('[data-logbtn]').forEach(el=>el.onclick=()=>logSet(el.dataset.logbtn));
+}
+async function handle(a,el){
+ try{
+ if(a==='go-coach'){st.view='coach-pass';render();}
+ else if(a==='entry'){st.view='entry';render();}
+ else if(a==='coach-ok'){const v=$('pass').value;if(v===C.COACH_PASSCODE){sessionStorage.setItem('coach','1');st.role='coach';await enterCoach();}else{$('passErr').textContent=T('رمز غير صحيح','Wrong passcode');}}
+ else if(a==='go-client'){st.view='join';render();}
+ else if(a==='join'){await doJoin();}
+ else if(a==='logout'){doLogout();}
+ else if(a==='roster'){st.sel=null;if(st.chan){sb.removeChannel(st.chan);st.chan=null;}st.tab='program';render();}
+ else if(a==='add-client'){await addClient();}
+ else if(a==='add-day'){st.sel.program=st.sel.program||{};st.sel.program[st.day]={title_ar:'يوم جديد',title_en:'New day',items:[]};st.showPick=true;render();}
+ else if(a==='pick'){st.showPick=true;render();}
+ else if(a==='pick-cancel'){st.showPick=false;render();}
+ else if(a==='save-prog'){await saveSelProgram();toast(T('انحفظ ✓','Saved ✓'));}
+ else if(a==='add-ex'){st.showAddEx=true;render();}
+ else if(a==='ex-cancel'){st.showAddEx=false;render();}
+ else if(a==='save-ex'){await addExercise();}
+ else if(a==='finish-ob'){await finishOnboard();}
+ else if(a==='send'){await doSend(el.dataset.who);}
+ }catch(e){console.error(e);toast((T('خطأ: ','Error: '))+(e.message||e),true);}
+}
+function doLogout(){localStorage.removeItem('client_id');sessionStorage.removeItem('coach');if(st.chan){sb.removeChannel(st.chan);st.chan=null;}st.role=null;st.client=null;st.sel=null;st.view='entry';render();}
+
+async function enterCoach(){
+ st.view='coach';render();
+ await loadExercises();await loadClients();render();
+}
+async function addClient(){
+ const name=prompt(T('اسم المشترك:','Athlete name:'));if(!name)return;
+ const ic=code();
+ const {error}=await sb.from('clients').insert({name:name.trim(),invite_code:ic});
+ if(error)throw error;
+ await loadClients();render();
+ toast(T('انضاف ✓ رمزه: ','Added ✓ code: ')+ic);
+}
+async function openClient(id){
+ st.sel=st.clients.find(c=>c.id===id);st.tab='program';st.day='tue';st.showPick=false;
+ const fresh=await loadClientById(id);if(fresh)st.sel=fresh;
+ st.sel.program=st.sel.program||{};
+ await loadMsgs(id);subscribeMsgs(id);render();
+}
+async function pickExercise(exId){
+ if(!st.sel.program[st.day])st.sel.program[st.day]={title_ar:'يوم جديد',title_en:'New day',items:[]};
+ st.sel.program[st.day].items.push({exId,sets:'4',reps:'8-10',weight:'',rest:'90',note_ar:'',note_en:''});
+ st.showPick=false;render();
+}
+async function addExercise(){
+ const ar=($('ex_ar').value||'').trim();if(!ar){toast(T('اكتب الاسم بالعربي','Add an Arabic name'),true);return;}
+ const row={name_ar:ar,name_en:($('ex_en').value||'').trim(),muscle:$('ex_m').value,yt:ytId(($('ex_yt').value||'').trim()),note_ar:($('ex_note').value||'').trim(),note_en:($('ex_note').value||'').trim()};
+ const {error}=await sb.from('exercises').insert(row);if(error)throw error;
+ st.showAddEx=false;await loadExercises();render();toast(T('انضاف ✓','Added ✓'));
+}
+async function doJoin(){
+ const v=($('code').value||'').trim();if(!v){return;}
+ const c=await loadClientByCode(v);
+ if(!c){$('joinErr').textContent=T('الرمز غير موجود','Code not found');return;}
+ localStorage.setItem('client_id',c.id);st.role='client';st.client=c;
+ if(!c.onboarded){st.view='onboard';render();}
+ else{await enterClient();}
+}
+async function enterClient(){
+ st.view='client';st.tab='program';
+ await loadExercises();
+ const fresh=await loadClientById(st.client.id);if(fresh)st.client=fresh;
+ await loadMsgs(st.client.id);subscribeMsgs(st.client.id);render();
+}
+async function finishOnboard(){
+ const num=id=>{const v=($(id)||{}).value;return v?Number(v):null;};
+ const patch={onboarded:true,age:num('o_age'),weight:num('o_weight'),height:num('o_height'),
+   level:st.ob.level,goal:st.ob.goal,injuries:st.ob.inj.filter(x=>x!=='none'),
+   measurements:{waist:num('o_waist')}};
+ await saveClient(patch);
+ await enterClient();toast(T('تم! 💪','Done! 💪'));
+}
+async function logSet(key){
+ const c=st.client;c.logs=c.logs||{};
+ const cur=c.logs[key];
+ if(cur&&cur.done){delete c.logs[key];}
+ else{const reps=(document.querySelector(`[data-log="${key}"][data-fld="reps"]`)||{}).value||'';
+   const weight=(document.querySelector(`[data-log="${key}"][data-fld="weight"]`)||{}).value||'';
+   c.logs[key]={reps,weight,done:true};}
+ render();
+ const {error}=await sb.from('clients').update({logs:c.logs}).eq('id',c.id);if(error){console.error(error);toast(T('ما انحفظ، جرّب ثاني','Save failed'),true);}
+}
+async function doSend(who){
+ const inp=$('msgInp');const v=(inp.value||'').trim();if(!v)return;
+ const cid = who==='coach'? st.sel.id : st.client.id;
+ inp.value='';
+ await sendMsg(cid,who,v);
+ // optimistic: realtime will append; but append now in case realtime lags
+ // (realtime handler also pushes; dedupe by id) — keep simple: rely on realtime
+}
+function afterChat(){const el=$('chatList');if(el){el.scrollTop=el.scrollHeight;}}
+
+/* ============ boot ============ */
+async function boot(){
+ render();
+ if(!configOK)return;
+ // restore session
+ if(sessionStorage.getItem('coach')==='1'){st.role='coach';await enterCoach();return;}
+ const cid=localStorage.getItem('client_id');
+ if(cid){try{const c=await loadClientById(cid);if(c){st.role='client';st.client=c;if(c.onboarded){await enterClient();}else{st.view='onboard';render();}return;}}catch(e){console.error(e);}}
+ st.view='entry';render();
+}
+// dedupe realtime: ensure no double messages
+const _origSub=subscribeMsgs;
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+boot();
+</script>
+</body>
+</html>
